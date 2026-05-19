@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FTTH Maps - Pemetaan Jaringan Fiber Optik</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="network_mapping.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -42,78 +43,86 @@
 
     <!-- Stats Bar -->
     <div class="stats-bar" id="stats-bar">
-      <div class="stat-card" data-type="pelanggan">
-        <div class="stat-icon pelanggan-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-pelanggan">0</span>
-          <span class="stat-label">Pelanggan</span>
-          <div class="stat-dots">
-            <span class="dot green" id="dot-pelanggan-active">●</span>
-            <span class="dot red" id="dot-pelanggan-inactive">●</span>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card" data-type="olt">
-        <div class="stat-icon olt-icon">
+      <!-- OLT -->
+      <div class="stat-card stat-card-router" data-type="olt">
+        <div class="stat-card-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 10h2M6 14h2M12 10h2M12 14h2M18 10h.01M18 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-olt">0</span>
-          <span class="stat-label">OLT</span>
-          <div class="stat-dots">
-            <span class="dot green" id="dot-olt-active">●</span>
-            <span class="dot red" id="dot-olt-inactive">●</span>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-olt">0</p>
+          <p class="stat-card-label">OLT</p>
+          <div class="stat-card-status stat-card-status-olt">
+            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-olt-active">0</span></span>
+            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-olt-inactive">0</span></span>
           </div>
         </div>
       </div>
-      <div class="stat-card" data-type="odc">
-        <div class="stat-icon odc-icon">
+      <!-- ODC -->
+      <div class="stat-card stat-card-odc" data-type="odc">
+        <div class="stat-card-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2"/></svg>
         </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-odc">0</span>
-          <span class="stat-label">ODC</span>
-          <div class="stat-dots">
-            <span class="dot green" id="dot-odc-active">●</span>
-            <span class="dot red" id="dot-odc-inactive">●</span>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-odc">0</p>
+          <p class="stat-card-label">ODC</p>
+          <div class="stat-card-status">
+            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odc-active">0</span></span>
+            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odc-inactive">0</span></span>
           </div>
         </div>
       </div>
-      <div class="stat-card" data-type="odp">
-        <div class="stat-icon odp-icon">
+      <!-- ODP -->
+      <div class="stat-card stat-card-odp" data-type="odp">
+        <div class="stat-card-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-odp">0</span>
-          <span class="stat-label">ODP</span>
-          <div class="stat-dots">
-            <span class="dot green" id="dot-odp-active">●</span>
-            <span class="dot red" id="dot-odp-inactive">●</span>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-odp">0</p>
+          <p class="stat-card-label">ODP</p>
+          <div class="stat-card-status">
+            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odp-active">0</span></span>
+            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odp-inactive">0</span></span>
+            <span class="status-maintenance"><i class="fa fa-circle"></i> <span id="dot-odp-maintenance">0</span></span>
           </div>
         </div>
       </div>
-      <div class="stat-card" data-type="splitter">
-        <div class="stat-icon splitter-icon">
+      <!-- Pelanggan -->
+      <div class="stat-card stat-card-customer" data-type="pelanggan">
+        <div class="stat-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-pelanggan">0</p>
+          <p class="stat-card-label">Pelanggan</p>
+          <div class="stat-card-status stat-card-status-customer">
+            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-pelanggan-active">0</span></span>
+            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-pelanggan-inactive">0</span></span>
+            <span class="status-isolir"><i class="fa fa-circle"></i> <span id="dot-pelanggan-isolir">0</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Splitter -->
+      <div class="stat-card stat-card-odp" data-type="splitter" style="border-left-color:#8b5cf6">
+        <div class="stat-card-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-splitter">0</span>
-          <span class="stat-label">Splitter</span>
-          <div class="stat-dots">
-            <span class="dot green" id="dot-splitter-active">●</span>
-            <span class="dot red" id="dot-splitter-inactive">●</span>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-splitter" style="color:#7c3aed">0</p>
+          <p class="stat-card-label">Splitter</p>
+          <div class="stat-card-status">
+            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-splitter-active">0</span></span>
+            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-splitter-inactive">0</span></span>
           </div>
         </div>
       </div>
-      <div class="stat-card" data-type="kabel">
-        <div class="stat-icon kabel-icon">
+      <!-- Kabel -->
+      <div class="stat-card stat-card-kabel" data-type="kabel">
+        <div class="stat-card-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12 Q8 6 12 12 Q16 18 20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
         </div>
-        <div class="stat-info">
-          <span class="stat-num" id="count-kabel">0</span>
-          <span class="stat-label">Kabel (km)</span>
+        <div class="stat-card-info">
+          <p class="stat-card-number" id="count-kabel">0</p>
+          <p class="stat-card-label">Kabel (km)</p>
         </div>
       </div>
     </div>
@@ -215,7 +224,7 @@
           <button class="map-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
           <button class="map-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
           <button class="map-btn" onclick="fitAllNodes()" title="Fit All">⊡</button>
-          <button class="map-btn" onclick="toggleHeatmap()" title="Heatmap" id="heatmap-btn">🔥</button>
+          <button class="map-btn" onclick="toggleMapFullscreen(event)" title="Fullscreen" id="fullscreen-btn">⛶</button>
         </div>
 
         <!-- Map Layer Switcher -->
@@ -276,8 +285,9 @@
         <div class="form-group">
           <label>Status</label>
           <select id="node-status">
-            <option value="active">Aktif</option>
-            <option value="inactive">Tidak Aktif</option>
+            <option value="active">Aktif / Online</option>
+            <option value="inactive">Tidak Aktif / Offline</option>
+            <option value="isolir">Isolir</option>
             <option value="maintenance">Maintenance</option>
           </select>
         </div>
@@ -363,5 +373,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+  <script src="realtime.js"></script>
+  <script src="map.js"></script>
 </body>
 </html>
