@@ -9,319 +9,555 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <div class="logo">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <circle cx="14" cy="14" r="13" stroke="#3b82f6" stroke-width="2"/>
-            <path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" fill="#3b82f6" opacity="0.2"/>
-            <path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" stroke="#3b82f6" stroke-width="1.5" fill="none"/>
-            <circle cx="14" cy="14" r="3" fill="#3b82f6"/>
-            <circle cx="7" cy="14" r="2" fill="#10b981"/>
-            <circle cx="21" cy="14" r="2" fill="#10b981"/>
-            <circle cx="14" cy="7" r="2" fill="#f59e0b"/>
-            <circle cx="14" cy="21" r="2" fill="#f59e0b"/>
-          </svg>
-          <span class="logo-text">FTTH Maps</span>
-        </div>
-        <span class="subtitle">Pemetaan Jaringan Fiber Optik</span>
-      </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" onclick="openModal('add-node')">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Tambah Node
-        </button>
-        <button class="btn btn-primary" onclick="openModal('add-cable')">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Tambah Kabel
-        </button>
-        <button class="btn btn-icon" onclick="toggleTheme()" title="Toggle Theme" id="theme-btn">🌙</button>
-      </div>
-    </header>
+<div id="app">
 
-    <!-- Stats Bar -->
-    <div class="stats-bar" id="stats-bar">
-      <!-- OLT -->
-      <div class="stat-card stat-card-router" data-type="olt">
-        <div class="stat-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 10h2M6 14h2M12 10h2M12 14h2M18 10h.01M18 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-olt">0</p>
-          <p class="stat-card-label">OLT</p>
-          <div class="stat-card-status stat-card-status-olt">
-            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-olt-active">0</span></span>
-            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-olt-inactive">0</span></span>
-          </div>
-        </div>
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="#3b82f6" stroke-width="2"/>
+          <path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" fill="#3b82f6" opacity="0.2"/>
+          <path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" stroke="#3b82f6" stroke-width="1.5" fill="none"/>
+          <circle cx="14" cy="14" r="3" fill="#3b82f6"/>
+          <circle cx="7" cy="14" r="2" fill="#10b981"/>
+          <circle cx="21" cy="14" r="2" fill="#10b981"/>
+          <circle cx="14" cy="7" r="2" fill="#f59e0b"/>
+          <circle cx="14" cy="21" r="2" fill="#f59e0b"/>
+        </svg>
+        <span class="logo-text">FTTH Maps</span>
       </div>
-      <!-- ODC -->
-      <div class="stat-card stat-card-odc" data-type="odc">
-        <div class="stat-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-odc">0</p>
-          <p class="stat-card-label">ODC</p>
-          <div class="stat-card-status">
-            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odc-active">0</span></span>
-            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odc-inactive">0</span></span>
-          </div>
-        </div>
+      <span class="subtitle">Pemetaan Jaringan Fiber Optik | OLT: HSGQ-XE04ID</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-icon" onclick="toggleTheme()" title="Toggle Tema" id="theme-btn">🌙</button>
+    </div>
+  </header>
+
+  <!-- ===== STATS BAR ===== -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-card stat-card-router" data-type="olt">
+      <div class="stat-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 10h2M6 14h2M12 10h2M12 14h2M18 10h.01M18 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
-      <!-- ODP -->
-      <div class="stat-card stat-card-odp" data-type="odp">
-        <div class="stat-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-odp">0</p>
-          <p class="stat-card-label">ODP</p>
-          <div class="stat-card-status">
-            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odp-active">0</span></span>
-            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odp-inactive">0</span></span>
-            <span class="status-maintenance"><i class="fa fa-circle"></i> <span id="dot-odp-maintenance">0</span></span>
-          </div>
-        </div>
-      </div>
-      <!-- Pelanggan -->
-      <div class="stat-card stat-card-customer" data-type="pelanggan">
-        <div class="stat-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-pelanggan">0</p>
-          <p class="stat-card-label">Pelanggan</p>
-          <div class="stat-card-status stat-card-status-customer">
-            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-pelanggan-active">0</span></span>
-            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-pelanggan-inactive">0</span></span>
-            <span class="status-isolir"><i class="fa fa-circle"></i> <span id="dot-pelanggan-isolir">0</span></span>
-          </div>
-        </div>
-      </div>
-      <!-- Splitter -->
-      <div class="stat-card stat-card-odp" data-type="splitter" style="border-left-color:#8b5cf6">
-        <div class="stat-card-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-splitter" style="color:#7c3aed">0</p>
-          <p class="stat-card-label">Splitter</p>
-          <div class="stat-card-status">
-            <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-splitter-active">0</span></span>
-            <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-splitter-inactive">0</span></span>
-          </div>
-        </div>
-      </div>
-      <!-- Kabel -->
-      <div class="stat-card stat-card-kabel" data-type="kabel">
-        <div class="stat-card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12 Q8 6 12 12 Q16 18 20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-        </div>
-        <div class="stat-card-info">
-          <p class="stat-card-number" id="count-kabel">0</p>
-          <p class="stat-card-label">Kabel (km)</p>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-olt">0</p>
+        <p class="stat-card-label">OLT</p>
+        <div class="stat-card-status stat-card-status-olt">
+          <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-olt-active">0</span></span>
+          <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-olt-inactive">0</span></span>
         </div>
       </div>
     </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <h3>Panel Kontrol</h3>
-          <button class="sidebar-toggle" onclick="toggleSidebar()">‹</button>
+    <div class="stat-card stat-card-odc" data-type="odc">
+      <div class="stat-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-odc">0</p>
+        <p class="stat-card-label">ODC</p>
+        <div class="stat-card-status">
+          <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odc-active">0</span></span>
+          <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odc-inactive">0</span></span>
         </div>
-
-        <!-- Search -->
-        <div class="search-box">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input type="text" id="search-input" placeholder="Cari node..." oninput="searchNodes(this.value)" />
+      </div>
+    </div>
+    <div class="stat-card stat-card-odp" data-type="odp">
+      <div class="stat-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-odp">0</p>
+        <p class="stat-card-label">ODP</p>
+        <div class="stat-card-status">
+          <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-odp-active">0</span></span>
+          <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-odp-inactive">0</span></span>
+          <span class="status-maintenance"><i class="fa fa-circle"></i> <span id="dot-odp-maintenance">0</span></span>
         </div>
-
-        <!-- Filter -->
-        <div class="filter-section">
-          <h4>Filter Tampilan</h4>
-          <div class="filter-grid">
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('pelanggan')" /> 
-              <span class="filter-dot pelanggan"></span> Pelanggan
-            </label>
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('olt')" /> 
-              <span class="filter-dot olt"></span> OLT
-            </label>
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('odc')" /> 
-              <span class="filter-dot odc"></span> ODC
-            </label>
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('odp')" /> 
-              <span class="filter-dot odp"></span> ODP
-            </label>
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('splitter')" /> 
-              <span class="filter-dot splitter"></span> Splitter
-            </label>
-            <label class="filter-item">
-              <input type="checkbox" checked onchange="toggleLayer('kabel')" /> 
-              <span class="filter-dot kabel"></span> Kabel FO
-            </label>
-          </div>
+      </div>
+    </div>
+    <div class="stat-card stat-card-customer" data-type="pelanggan">
+      <div class="stat-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-pelanggan">0</p>
+        <p class="stat-card-label">Pelanggan</p>
+        <div class="stat-card-status stat-card-status-customer">
+          <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-pelanggan-active">0</span></span>
+          <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-pelanggan-inactive">0</span></span>
+          <span class="status-isolir"><i class="fa fa-circle"></i> <span id="dot-pelanggan-isolir">0</span></span>
         </div>
-
-        <!-- Node List -->
-        <div class="node-list-section">
-          <h4>Daftar Node <span id="node-count-badge" class="badge">0</span></h4>
-          <div id="node-list" class="node-list"></div>
+      </div>
+    </div>
+    <div class="stat-card stat-card-odp" data-type="splitter" style="border-left-color:#8b5cf6">
+      <div class="stat-card-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-splitter" style="color:#7c3aed">0</p>
+        <p class="stat-card-label">Splitter</p>
+        <div class="stat-card-status">
+          <span class="status-online"><i class="fa fa-circle"></i> <span id="dot-splitter-active">0</span></span>
+          <span class="status-offline"><i class="fa fa-circle"></i> <span id="dot-splitter-inactive">0</span></span>
         </div>
-
-        <!-- Power Calculator -->
-        <div class="power-section">
-          <h4>🔆 Kalkulator Daya Optik</h4>
-          <div class="power-form">
-            <label>Daya TX OLT (dBm)</label>
-            <input type="number" id="tx-power" value="3" step="0.1" oninput="calcPower()" />
-            <label>Panjang Kabel (km)</label>
-            <input type="number" id="cable-len" value="1" step="0.1" min="0" oninput="calcPower()" />
-            <label>Jumlah Splitter 1:N</label>
-            <select id="splitter-ratio" onchange="calcPower()">
-              <option value="3.5">1:2 (-3.5 dB)</option>
-              <option value="7">1:4 (-7 dB)</option>
-              <option value="10.5" selected>1:8 (-10.5 dB)</option>
-              <option value="14">1:16 (-14 dB)</option>
-              <option value="17.5">1:32 (-17.5 dB)</option>
-            </select>
-            <label>Jumlah Konektor</label>
-            <input type="number" id="connector-count" value="4" min="0" oninput="calcPower()" />
-            <div class="power-result" id="power-result">
-              <div class="power-result-row">
-                <span>Redaman Total:</span>
-                <span id="total-loss" class="result-val">--</span>
-              </div>
-              <div class="power-result-row">
-                <span>Daya RX:</span>
-                <span id="rx-power" class="result-val">--</span>
-              </div>
-              <div class="power-result-row">
-                <span>Status:</span>
-                <span id="rx-status" class="result-val">--</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Map -->
-      <div class="map-container">
-        <div id="map"></div>
-
-        <!-- Map Controls -->
-        <div class="map-controls">
-          <button class="map-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
-          <button class="map-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
-          <button class="map-btn" onclick="fitAllNodes()" title="Fit All">⊡</button>
-          <button class="map-btn" onclick="toggleMapFullscreen(event)" title="Fullscreen" id="fullscreen-btn">⛶</button>
-        </div>
-
-        <!-- Map Layer Switcher -->
-        <div class="layer-switcher">
-          <button class="layer-btn active" onclick="switchLayer('satellite', this)">Satelit</button>
-          <button class="layer-btn" onclick="switchLayer('street', this)">Jalan</button>
-          <button class="layer-btn" onclick="switchLayer('topo', this)">Topo</button>
-        </div>
-
-        <!-- Legend -->
-        <div class="legend">
-          <div class="legend-title">Legenda</div>
-          <div class="legend-item"><span class="legend-dot olt"></span> OLT</div>
-          <div class="legend-item"><span class="legend-dot odc"></span> ODC</div>
-          <div class="legend-item"><span class="legend-dot odp"></span> ODP</div>
-          <div class="legend-item"><span class="legend-dot splitter"></span> Splitter</div>
-          <div class="legend-item"><span class="legend-dot pelanggan"></span> Pelanggan</div>
-          <div class="legend-item"><span class="legend-line main"></span> Trunk FO</div>
-          <div class="legend-item"><span class="legend-line drop"></span> Drop Cable</div>
-        </div>
+      </div>
+    </div>
+    <div class="stat-card stat-card-kabel" data-type="kabel">
+      <div class="stat-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12 Q8 6 12 12 Q16 18 20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="stat-card-info">
+        <p class="stat-card-number" id="count-kabel">0</p>
+        <p class="stat-card-label">Kabel (km)</p>
       </div>
     </div>
   </div>
 
-  <!-- Modal Tambah Node -->
-  <div class="modal-overlay" id="modal-add-node" style="display:none">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Tambah Node Jaringan</h3>
-        <button class="modal-close" onclick="closeModal('add-node')">✕</button>
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Panel Kontrol</h3>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">‹</button>
       </div>
-      <div class="modal-body">
+
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="search-input" placeholder="Cari node..." oninput="searchNodes(this.value)" />
+      </div>
+
+      <div class="filter-section">
+        <h4>Filter Tampilan</h4>
+        <div class="filter-grid">
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('pelanggan')"/> <span class="filter-dot pelanggan"></span> Pelanggan</label>
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('olt')"/> <span class="filter-dot olt"></span> OLT</label>
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('odc')"/> <span class="filter-dot odc"></span> ODC</label>
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('odp')"/> <span class="filter-dot odp"></span> ODP</label>
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('splitter')"/> <span class="filter-dot splitter"></span> Splitter</label>
+          <label class="filter-item"><input type="checkbox" checked onchange="toggleLayer('kabel')"/> <span class="filter-dot kabel"></span> Kabel FO</label>
+        </div>
+      </div>
+
+      <div class="node-list-section">
+        <h4>Daftar Node <span id="node-count-badge" class="badge">0</span></h4>
+        <div id="node-list" class="node-list"></div>
+      </div>
+
+      <div class="power-section">
+        <h4>🔆 Kalkulator Daya Optik</h4>
+        <div class="power-form">
+          <label>Daya TX OLT (dBm)</label>
+          <input type="number" id="tx-power" value="3" step="0.1" oninput="calcPower()" />
+          <label>Panjang Kabel (km)</label>
+          <input type="number" id="cable-len" value="1" step="0.1" min="0" oninput="calcPower()" />
+          <label>Splitter 1:N</label>
+          <select id="splitter-ratio" onchange="calcPower()">
+            <option value="3.5">1:2 (-3.5 dB)</option>
+            <option value="7">1:4 (-7 dB)</option>
+            <option value="10.5" selected>1:8 (-10.5 dB)</option>
+            <option value="14">1:16 (-14 dB)</option>
+            <option value="17.5">1:32 (-17.5 dB)</option>
+          </select>
+          <label>Jumlah Konektor</label>
+          <input type="number" id="connector-count" value="4" min="0" oninput="calcPower()" />
+          <div class="power-result">
+            <div class="power-result-row"><span>Redaman Total:</span><span id="total-loss" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Daya RX:</span><span id="rx-power" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Status:</span><span id="rx-status" class="result-val">--</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Map -->
+    <div class="map-container">
+      <div id="map"></div>
+
+      <!-- Pick Mode Indicator Banner -->
+      <div class="pick-indicator" id="pickModeIndicator">
+        <div class="pick-indicator-inner">
+          <span class="pick-indicator-icon">🎯</span>
+          <span class="pick-indicator-text" id="pickModeText">Klik pada peta untuk memilih lokasi</span>
+          <button class="pick-indicator-cancel" onclick="batalkanModePick()">✕ Batal</button>
+        </div>
+      </div>
+
+      <!-- Map Controls -->
+      <div class="map-controls">
+        <button class="map-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
+        <button class="map-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
+        <button class="map-btn" onclick="fitAllNodes()" title="Fit Semua">⊡</button>
+        <button class="map-btn" onclick="toggleMapFullscreen(event)" title="Fullscreen">⛶</button>
+      </div>
+
+      <!-- Layer Switcher -->
+      <div class="layer-switcher">
+        <button class="layer-btn active" onclick="switchLayer('satellite', this)">Satelit</button>
+        <button class="layer-btn" onclick="switchLayer('street', this)">Jalan</button>
+        <button class="layer-btn" onclick="switchLayer('topo', this)">Topo</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-title">Legenda</div>
+        <div class="legend-item"><span class="legend-dot olt"></span> OLT</div>
+        <div class="legend-item"><span class="legend-dot odc"></span> ODC</div>
+        <div class="legend-item"><span class="legend-dot odp"></span> ODP</div>
+        <div class="legend-item"><span class="legend-dot splitter"></span> Splitter</div>
+        <div class="legend-item"><span class="legend-dot pelanggan"></span> Pelanggan</div>
+        <div class="legend-item"><span class="legend-line main"></span> Trunk</div>
+        <div class="legend-item"><span class="legend-line drop"></span> Drop</div>
+      </div>
+
+      <!-- FAB - Floating Action Button -->
+      <div class="fab-container" id="fabContainer">
+        <button class="fab-main" id="fabMain" onclick="toggleFab()" title="Tambah Data">
+          <span class="fab-icon" id="fabIcon">+</span>
+        </button>
+        <div class="fab-menu" id="fabMenu">
+          <div class="fab-section-label">Tambah Node</div>
+          <div class="fab-grid">
+            <button class="fab-item fab-olt" onclick="aktivasiPickMode('olt')" title="Tambah OLT">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 10h2M12 10h2M18 10h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>OLT</span>
+            </button>
+            <button class="fab-item fab-odc" onclick="aktivasiPickMode('odc')" title="Tambah ODC">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2"/></svg>
+              <span>ODC</span>
+            </button>
+            <button class="fab-item fab-odp" onclick="aktivasiPickMode('odp')" title="Tambah ODP">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>ODP</span>
+            </button>
+            <button class="fab-item fab-splitter" onclick="aktivasiPickMode('splitter')" title="Tambah Splitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>Splitter</span>
+            </button>
+            <button class="fab-item fab-pelanggan" onclick="aktivasiPickMode('pelanggan')" title="Tambah Pelanggan">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+              <span>Pelanggan</span>
+            </button>
+            <button class="fab-item fab-kabel" onclick="bukaModalKabel()" title="Tambah Kabel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 12 Q8 6 12 12 Q16 18 20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+              <span>Kabel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end map-container -->
+  </div><!-- end main-content -->
+</div><!-- end app -->
+
+<!-- ===== MODAL OLT ===== -->
+<div class="modal-overlay" id="modal-olt" style="display:none">
+  <div class="modal">
+    <div class="modal-header" style="border-left:4px solid #6366f1">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><rect x="2" y="6" width="20" height="12" rx="2" stroke="#6366f1" stroke-width="2"/></svg>
+        Tambah OLT
+      </h3>
+      <button class="modal-close" onclick="tutupModalNode('olt')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-coord-display" id="coord-display-olt">
+        <span class="pick-coord-icon">📍</span>
+        <span id="coord-text-olt">Koordinat belum dipilih</span>
+      </div>
+      <div class="form-group">
+        <label>Nama OLT <span style="color:#ef4444">*</span></label>
+        <input type="text" id="olt-name" placeholder="Contoh: OLT-WGK-001" />
+      </div>
+      <div class="form-row">
         <div class="form-group">
-          <label>Jenis Node</label>
-          <select id="node-type" onchange="updateNodeForm()">
-            <option value="pelanggan">Pelanggan</option>
-            <option value="olt">OLT</option>
-            <option value="odc">ODC</option>
-            <option value="odp">ODP</option>
-            <option value="splitter">Splitter</option>
+          <label>Brand / Merk</label>
+          <select id="olt-brand">
+            <option value="HSGQ">HSGQ</option>
+            <option value="ZTE">ZTE</option>
+            <option value="Huawei">Huawei</option>
+            <option value="C-DATA">C-DATA</option>
+            <option value="VSOL">VSOL</option>
+            <option value="Lainnya">Lainnya</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Nama / ID Node</label>
-          <input type="text" id="node-name" placeholder="Contoh: ODP-A01, Pelanggan-001" />
+          <label>Model / Tipe</label>
+          <input type="text" id="olt-model" placeholder="XE04ID" />
         </div>
-        <div class="form-group" id="node-extra-fields">
-          <!-- Dynamic fields -->
-        </div>
+      </div>
+      <div class="form-row">
         <div class="form-group">
-          <label>Latitude</label>
-          <input type="number" id="node-lat" placeholder="-6.345932" step="0.000001" />
-        </div>
-        <div class="form-group">
-          <label>Longitude</label>
-          <input type="number" id="node-lng" placeholder="107.955388" step="0.000001" />
+          <label>Total PON Port</label>
+          <input type="number" id="olt-ports" value="4" min="1" max="128" />
         </div>
         <div class="form-group">
           <label>Status</label>
-          <select id="node-status">
-            <option value="active">Aktif / Online</option>
-            <option value="inactive">Tidak Aktif / Offline</option>
+          <select id="olt-status">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Keterangan</label>
+        <textarea id="olt-notes" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalNode('olt')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanNode('olt')" style="background:#6366f1;border-color:#6366f1">Simpan OLT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ODC ===== -->
+<div class="modal-overlay" id="modal-odc" style="display:none">
+  <div class="modal">
+    <div class="modal-header" style="border-left:4px solid #10b981">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#10b981" stroke-width="2"/></svg>
+        Tambah ODC
+      </h3>
+      <button class="modal-close" onclick="tutupModalNode('odc')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-coord-display" id="coord-display-odc">
+        <span class="pick-coord-icon">📍</span>
+        <span id="coord-text-odc">Koordinat belum dipilih</span>
+      </div>
+      <div class="form-group">
+        <label>Nama ODC <span style="color:#ef4444">*</span></label>
+        <input type="text" id="odc-name" placeholder="Contoh: ODC-A01" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kapasitas Splitter</label>
+          <select id="odc-capacity">
+            <option value="1:4">1:4 (4 port)</option>
+            <option value="1:8" selected>1:8 (8 port)</option>
+            <option value="1:16">1:16 (16 port)</option>
+            <option value="1:32">1:32 (32 port)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="odc-status">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Terhubung ke OLT</label>
+        <select id="odc-parent-olt">
+          <option value="">-- Tidak Ada --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Keterangan</label>
+        <textarea id="odc-notes" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalNode('odc')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanNode('odc')" style="background:#10b981;border-color:#10b981">Simpan ODC</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ODP ===== -->
+<div class="modal-overlay" id="modal-odp" style="display:none">
+  <div class="modal">
+    <div class="modal-header" style="border-left:4px solid #f59e0b">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><circle cx="12" cy="12" r="4" stroke="#f59e0b" stroke-width="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/></svg>
+        Tambah ODP
+      </h3>
+      <button class="modal-close" onclick="tutupModalNode('odp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-coord-display" id="coord-display-odp">
+        <span class="pick-coord-icon">📍</span>
+        <span id="coord-text-odp">Koordinat belum dipilih</span>
+      </div>
+      <div class="form-group">
+        <label>Nama ODP <span style="color:#ef4444">*</span></label>
+        <input type="text" id="odp-name" placeholder="Contoh: ODP-A01" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kapasitas Core</label>
+          <select id="odp-capacity">
+            <option value="4">4 Core</option>
+            <option value="8" selected>8 Core</option>
+            <option value="12">12 Core</option>
+            <option value="16">16 Core</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="odp-status">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Terhubung ke ODC</label>
+        <select id="odp-parent-odc">
+          <option value="">-- Tidak Ada --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Keterangan</label>
+        <textarea id="odp-notes" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalNode('odp')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanNode('odp')" style="background:#f59e0b;border-color:#d97706;color:#fff">Simpan ODP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SPLITTER ===== -->
+<div class="modal-overlay" id="modal-splitter" style="display:none">
+  <div class="modal">
+    <div class="modal-header" style="border-left:4px solid #8b5cf6">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/></svg>
+        Tambah Splitter
+      </h3>
+      <button class="modal-close" onclick="tutupModalNode('splitter')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-coord-display" id="coord-display-splitter">
+        <span class="pick-coord-icon">📍</span>
+        <span id="coord-text-splitter">Koordinat belum dipilih</span>
+      </div>
+      <div class="form-group">
+        <label>Nama Splitter <span style="color:#ef4444">*</span></label>
+        <input type="text" id="splitter-name" placeholder="Contoh: SPL-A01-1" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rasio Splitter</label>
+          <select id="splitter-rasio">
+            <option value="1:2">1:2</option>
+            <option value="1:4">1:4</option>
+            <option value="1:8" selected>1:8</option>
+            <option value="1:16">1:16</option>
+            <option value="1:32">1:32</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="splitter-status">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Terhubung ke ODP</label>
+        <select id="splitter-parent-odp">
+          <option value="">-- Tidak Ada --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Keterangan</label>
+        <textarea id="splitter-notes" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalNode('splitter')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanNode('splitter')" style="background:#8b5cf6;border-color:#7c3aed">Simpan Splitter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PELANGGAN ===== -->
+<div class="modal-overlay" id="modal-pelanggan" style="display:none">
+  <div class="modal">
+    <div class="modal-header" style="border-left:4px solid #06b6d4">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="#06b6d4" stroke-width="2"/></svg>
+        Tambah Pelanggan
+      </h3>
+      <button class="modal-close" onclick="tutupModalNode('pelanggan')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-coord-display" id="coord-display-pelanggan">
+        <span class="pick-coord-icon">📍</span>
+        <span id="coord-text-pelanggan">Koordinat belum dipilih</span>
+      </div>
+      <div class="form-group">
+        <label>Nama Pelanggan <span style="color:#ef4444">*</span></label>
+        <input type="text" id="pelanggan-name" placeholder="Contoh: PLG-001 Budi S." />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipe ONT</label>
+          <input type="text" id="pelanggan-ont" placeholder="ZTE F601" />
+        </div>
+        <div class="form-group">
+          <label>Port PON</label>
+          <input type="text" id="pelanggan-port" placeholder="PON-1/0/1" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Terhubung ke ODP</label>
+          <select id="pelanggan-parent-odp">
+            <option value="">-- Tidak Ada --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="pelanggan-status">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
             <option value="isolir">Isolir</option>
             <option value="maintenance">Maintenance</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Catatan</label>
-          <textarea id="node-notes" placeholder="Catatan tambahan..." rows="2"></textarea>
-        </div>
-        <div class="form-tip">
-          💡 Klik langsung pada peta untuk mengisi koordinat otomatis
-        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('add-node')">Batal</button>
-        <button class="btn btn-primary" onclick="addNode()">Simpan Node</button>
+      <div class="form-group">
+        <label>Keterangan</label>
+        <textarea id="pelanggan-notes" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalNode('pelanggan')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanNode('pelanggan')" style="background:#06b6d4;border-color:#0891b2">Simpan Pelanggan</button>
+    </div>
   </div>
+</div>
 
-  <!-- Modal Tambah Kabel -->
-  <div class="modal-overlay" id="modal-add-cable" style="display:none">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Tambah Kabel Fiber Optik</h3>
-        <button class="modal-close" onclick="closeModal('add-cable')">✕</button>
+<!-- ===== MODAL KABEL ===== -->
+<div class="modal-overlay" id="modal-add-cable" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Tambah Kabel Fiber Optik</h3>
+      <button class="modal-close" onclick="closeModal('add-cable')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Dari Node</label>
+        <select id="cable-from"></select>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Dari Node</label>
-          <select id="cable-from"></select>
-        </div>
-        <div class="form-group">
-          <label>Ke Node</label>
-          <select id="cable-to"></select>
-        </div>
+      <div class="form-group">
+        <label>Ke Node</label>
+        <select id="cable-to"></select>
+      </div>
+      <div class="form-row">
         <div class="form-group">
           <label>Jenis Kabel</label>
           <select id="cable-type">
@@ -340,40 +576,41 @@
             <option value="48">48 Core</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Status Kabel</label>
-          <select id="cable-status">
-            <option value="active">Aktif</option>
-            <option value="inactive">Tidak Aktif</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('add-cable')">Batal</button>
-        <button class="btn btn-primary" onclick="addCable()">Simpan Kabel</button>
+      <div class="form-group">
+        <label>Status Kabel</label>
+        <select id="cable-status">
+          <option value="active">Aktif</option>
+          <option value="inactive">Tidak Aktif</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
       </div>
     </div>
-  </div>
-
-  <!-- Modal Detail Node -->
-  <div class="modal-overlay" id="modal-node-detail" style="display:none">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="detail-title">Detail Node</h3>
-        <button class="modal-close" onclick="closeModal('node-detail')">✕</button>
-      </div>
-      <div class="modal-body" id="detail-body"></div>
-      <div class="modal-footer">
-        <button class="btn btn-danger" onclick="deleteCurrentNode()">Hapus</button>
-        <button class="btn btn-secondary" onclick="closeModal('node-detail')">Tutup</button>
-      </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-cable')">Batal</button>
+      <button class="btn btn-primary" onclick="addCable()">Simpan Kabel</button>
     </div>
   </div>
+</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
-  <script src="realtime.js"></script>
-  <script src="map.js"></script>
+<!-- ===== MODAL DETAIL NODE ===== -->
+<div class="modal-overlay" id="modal-node-detail" style="display:none">
+  <div class="modal">
+    <div class="modal-header" id="detail-header">
+      <h3 id="detail-title">Detail Node</h3>
+      <button class="modal-close" onclick="closeModal('node-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteCurrentNode()" style="margin-right:auto">Hapus</button>
+      <button class="btn btn-secondary" onclick="closeModal('node-detail')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+<script src="realtime.js"></script>
+<script src="map.js"></script>
 </body>
 </html>

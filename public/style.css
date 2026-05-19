@@ -423,3 +423,198 @@ body.body-map-fullscreen .legend {
   .stats-bar .stat-card { min-width: 100px; padding: 8px 10px !important; }
   .stats-bar .stat-card-number { font-size: 18px !important; }
 }
+
+/* ===== PICK MODE INDICATOR ===== */
+.pick-indicator {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  display: none;
+  pointer-events: none;
+}
+.pick-indicator.active {
+  display: block;
+  pointer-events: all;
+}
+.pick-indicator-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1d4ed8;
+  color: white;
+  border-radius: 30px;
+  padding: 10px 18px;
+  box-shadow: 0 4px 20px rgba(29,78,216,0.5);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  animation: pickPulse 1.5s ease-in-out infinite;
+}
+@keyframes pickPulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(29,78,216,0.5); }
+  50%      { box-shadow: 0 4px 32px rgba(29,78,216,0.9); }
+}
+.pick-indicator-icon { font-size: 18px; }
+.pick-indicator-cancel {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 4px;
+  transition: background .15s;
+}
+.pick-indicator-cancel:hover { background: rgba(255,255,255,0.35); }
+
+/* Cursor crosshair saat pick mode */
+#map.pick-mode { cursor: crosshair !important; }
+
+/* ===== FAB - FLOATING ACTION BUTTON ===== */
+.fab-container {
+  position: absolute;
+  bottom: 80px;
+  right: 12px;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.fab-main {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.5);
+  transition: all 0.2s;
+  position: relative;
+  z-index: 601;
+}
+.fab-main:hover { background: var(--accent2); transform: scale(1.05); }
+.fab-icon {
+  color: white;
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+  transition: transform 0.25s;
+  display: block;
+}
+.fab-icon.open { transform: rotate(45deg); }
+
+.fab-menu {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: none;
+  min-width: 210px;
+}
+.fab-menu.open { display: block; }
+
+.fab-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+.fab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.fab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 500;
+}
+.fab-item:hover { transform: translateY(-2px); border-color: currentColor; }
+.fab-item svg { flex-shrink: 0; }
+
+/* Warna per tipe */
+.fab-olt      { color: #6366f1; } .fab-olt:hover      { background: rgba(99,102,241,.12); }
+.fab-odc      { color: #10b981; } .fab-odc:hover      { background: rgba(16,185,129,.12); }
+.fab-odp      { color: #f59e0b; } .fab-odp:hover      { background: rgba(245,158,11,.12); }
+.fab-splitter { color: #8b5cf6; } .fab-splitter:hover { background: rgba(139,92,246,.12); }
+.fab-pelanggan{ color: #06b6d4; } .fab-pelanggan:hover{ background: rgba(6,182,212,.12); }
+.fab-kabel    { color: #94a3b8; } .fab-kabel:hover    { background: rgba(148,163,184,.12); }
+
+/* ===== KOORDINAT DISPLAY DI MODAL ===== */
+.pick-coord-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.pick-coord-display.has-coord {
+  border-color: #10b981;
+  background: rgba(16,185,129,0.08);
+  color: #10b981;
+}
+.pick-coord-icon { font-size: 16px; flex-shrink: 0; }
+
+/* Tombol ubah lokasi (remap) di detail node */
+.btn-remap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all .15s;
+}
+.btn-remap:hover { background: rgba(59,130,246,.1); }
+
+/* ===== FORM ROW (2 kolom) ===== */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ===== TEMP MARKER STYLE ===== */
+.temp-marker-wrap {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  animation: tempBounce .4s ease;
+}
+@keyframes tempBounce {
+  0%   { transform: scale(0.5) translateY(-10px); opacity:0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity:1; }
+}
