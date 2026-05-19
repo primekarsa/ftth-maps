@@ -662,6 +662,8 @@ function showNodeDetail(id) {
     +'<span class="detail-value">'+conn.length+' kabel terhubung</span></div>'
     +(node.notes?'<div class="detail-row"><span class="detail-label">Catatan</span>'
       +'<span class="detail-value">'+node.notes+'</span></div>':'')
+    // Splitter Calculator hanya untuk ODC dan ODP
+    +((node.type==='odc'||node.type==='odp') ? buildSplitterCalcHTML(node.id, node.type) : '')
     // Tombol ubah lokasi
     +'<div class="detail-row" style="border:none;padding-top:8px">'
     +'<button class="btn-remap" onclick="aktivasiPickModeRemap(\''+node.type+'\')">'
@@ -733,22 +735,248 @@ function addCable() {
   saveData(); syncNetworkData(); closeModal('add-cable'); renderAll();
 }
 
-// ==================== POWER CALC ====================
-function calcPower() {
-  var tx =parseFloat(document.getElementById('tx-power').value)||0;
-  var cl =parseFloat(document.getElementById('cable-len').value)||0;
-  var sr =parseFloat(document.getElementById('splitter-ratio').value)||0;
-  var cn =parseInt(document.getElementById('connector-count').value)||0;
-  var tl =(cl*0.35)+(cl*0.1)+sr+(cn*0.3);
-  var rx =tx-tl;
+// ==================== KONSTANTA REDAMAN (dari tabel referensi) ====================
+var LOSS_KABEL_PER_KM = 0.3;   // dB/km
+var LOSS_SPLICING     = 0.03;  // dB per sambungan
+var LOSS_FC           = 0.3;   // dB per fast connector
+var LOSS_PIGTAIL      = 0.3;   // dB per pigtail/patchcord
+var TX_POWER_SFP      = -1.9866; // dBm SFP OLT (Hisense LTF1303-BH+1)
+var RX_SENSITIVITY    = -27;   // dBm batas minimum ONT EPON
 
-  document.getElementById('total-loss').textContent='-'+tl.toFixed(2)+' dB';
-  var rpEl=document.getElementById('rx-power');
-  var rsEl=document.getElementById('rx-status');
-  rpEl.textContent=rx.toFixed(2)+' dBm';
-  if(rx>=-24){ rpEl.className='result-val result-ok'; rsEl.textContent='✅ Sangat Baik'; rsEl.className='result-val result-ok'; }
-  else if(rx>=-27){ rpEl.className='result-val result-warn'; rsEl.textContent='⚠️ Normal (Batas)'; rsEl.className='result-val result-warn'; }
-  else{ rpEl.className='result-val result-bad'; rsEl.textContent='❌ Di Bawah Batas'; rsEl.className='result-val result-bad'; }
+// Splitter PLC loss (dB) — dari tabel gambar
+var SPLITTER_PLC_LOSS = {
+  '1:2': 3.25, '1:4': 7, '1:8': 10,
+  '1:16': 13.5, '1:32': 17, '1:64': 20
+};
+
+// Splitter Persen Rasio — semua baris dari tabel gambar 2
+// format: 'X:Y' → { kecil: loss%, besar: loss% }
+var SPLITTER_RASIO = {
+  '1:99':  { kecil:20.2,  besar:0.24 },
+  '2:98':  { kecil:17.19, besar:0.29 },
+  '3:97':  { kecil:15.43, besar:0.33 },
+  '4:96':  { kecil:14.18, besar:0.38 },
+  '5:95':  { kecil:13.21, besar:0.42 },
+  '6:94':  { kecil:12.42, besar:0.47 },
+  '7:93':  { kecil:11.75, besar:0.52 },
+  '8:92':  { kecil:11.17, besar:0.56 },
+  '9:91':  { kecil:10.66, besar:0.61 },
+  '10:90': { kecil:10.2,  besar:0.66 },
+  '12:88': { kecil:9.41,  besar:0.76 },
+  '15:85': { kecil:8.44,  besar:0.91 },
+  '18:82': { kecil:7.65,  besar:1.06 },
+  '20:80': { kecil:7.19,  besar:1.17 },
+  '22:78': { kecil:6.78,  besar:1.28 },
+  '25:75': { kecil:6.22,  besar:1.45 },
+  '28:72': { kecil:5.73,  besar:1.63 },
+  '30:70': { kecil:5.43,  besar:1.75 },
+  '35:65': { kecil:4.76,  besar:2.07 },
+  '40:60': { kecil:4.18,  besar:2.42 },
+  '45:55': { kecil:3.67,  besar:2.8  },
+  '50:50': { kecil:3.21,  besar:3.21 }
+};
+
+// Helper: hitung status RX
+function getRxStatus(rx) {
+  if (rx >= -24) return { cls:'result-ok',   icon:'✅', label:'Sangat Baik' };
+  if (rx >= -27) return { cls:'result-warn',  icon:'⚠️', label:'Normal (Batas)' };
+  return              { cls:'result-bad',   icon:'❌', label:'Di Bawah Batas' };
+}
+function getSplStatusClass(rx) {
+  if (rx >= -24) return 'spl-status-ok';
+  if (rx >= -27) return 'spl-status-warn';
+  return 'spl-status-bad';
+}
+
+// ==================== KALKULATOR SIDEBAR ====================
+function calcPower() {
+  var tx   = parseFloat(document.getElementById('tx-power').value) || TX_POWER_SFP;
+  var km   = parseFloat(document.getElementById('cable-len').value) || 0;
+  var spl  = parseFloat(document.getElementById('splitter-ratio').value) || 0;
+  var spl_count = parseInt(document.getElementById('splice-count').value) || 0;
+  var fc   = parseInt(document.getElementById('fc-count').value) || 0;
+  var pig  = parseInt(document.getElementById('pigtail-count').value) || 0;
+
+  var lossKabel  = km * LOSS_KABEL_PER_KM;
+  var lossKonek  = (spl_count * LOSS_SPLICING) + (fc * LOSS_FC) + (pig * LOSS_PIGTAIL);
+  var lossSplit  = spl;
+  var totalLoss  = lossKabel + lossKonek + lossSplit;
+  var rx         = tx - totalLoss;
+  var st         = getRxStatus(rx);
+
+  var elLK = document.getElementById('loss-kabel');
+  var elLN = document.getElementById('loss-konek');
+  var elLS = document.getElementById('loss-split');
+  var elTL = document.getElementById('total-loss');
+  var elRP = document.getElementById('rx-power');
+  var elRS = document.getElementById('rx-status');
+
+  if(elLK) elLK.textContent = '-' + lossKabel.toFixed(3) + ' dB';
+  if(elLN) elLN.textContent = '-' + lossKonek.toFixed(3) + ' dB';
+  if(elLS) elLS.textContent = '-' + lossSplit.toFixed(2)  + ' dB';
+  if(elTL) elTL.textContent = '-' + totalLoss.toFixed(3) + ' dB';
+  if(elRP) { elRP.textContent = rx.toFixed(4) + ' dBm'; elRP.className = 'result-val ' + st.cls; }
+  if(elRS) { elRS.textContent = st.icon + ' ' + st.label; elRS.className = 'result-val ' + st.cls; }
+}
+
+// ==================== SPLITTER CALC (ODC / ODP popup) ====================
+
+// Build HTML splitter calculator untuk ditempel di detail modal
+function buildSplitterCalcHTML(nodeId, nodeType) {
+  var node = appData.nodes.find(function(n){ return n.id === nodeId; });
+  if (!node) return '';
+
+  // Coba estimasi input dBm dari parent
+  var inputDbm = estimasiInputDari(nodeId);
+  var cardClass = nodeType === 'odp' ? 'spl-calc-card card-odp' : 'spl-calc-card';
+  var headerColor = nodeType === 'odp' ? '#f59e0b' : '#10b981';
+  var btnClass = nodeType === 'odp' ? 'spl-btn' : 'spl-btn btn-green';
+  var uid = 'sc_' + nodeId; // prefix unik per node
+
+  // Build option rasio
+  var rasioOpts = Object.keys(SPLITTER_RASIO).map(function(k){
+    return '<option value="'+k+'">'+k+' (Tap:'+SPLITTER_RASIO[k].kecil+'dB / Pass:'+SPLITTER_RASIO[k].besar+'dB)</option>';
+  }).join('');
+  var defaultRasio = '20:80';
+
+  // Build option PLC
+  var plcOpts = Object.keys(SPLITTER_PLC_LOSS).map(function(k){
+    var sel = (k==='1:8') ? ' selected' : '';
+    return '<option value="'+k+'"'+sel+'>'+k+' (Redaman '+SPLITTER_PLC_LOSS[k]+' dB)</option>';
+  }).join('');
+
+  return '<div class="'+cardClass+'" id="'+uid+'">'
+    + '<div class="spl-calc-header">'
+    +   '<span class="spl-calc-header-icon">🧮</span>'
+    +   '<span>Splitter Calculator</span>'
+    + '</div>'
+    + '<div class="spl-calc-body">'
+
+    // Input laser
+    + '<div class="spl-field">'
+    +   '<span class="spl-label">Input Laser (dBm)</span>'
+    +   '<input class="spl-input" type="number" id="'+uid+'_input" step="0.0001"'
+    +     ' value="'+inputDbm.toFixed(4)+'" oninput="hitungSplCalc(\''+uid+'\')" />'
+    +   '<small class="spl-output-hint">Daya dari parent node / OLT</small>'
+    + '</div>'
+
+    // Splitter Rasio
+    + '<div class="spl-field">'
+    +   '<span class="spl-label">Splitter Rasio (Persen)</span>'
+    +   '<select class="spl-select" id="'+uid+'_rasio" onchange="hitungSplCalc(\''+uid+'\')">'
+    +     '<option value="">-- Tidak Ada Rasio Splitter --</option>'
+    +     rasioOpts
+    +   '</select>'
+    + '</div>'
+
+    // Splitter PLC
+    + '<div class="spl-field">'
+    +   '<span class="spl-label">Splitter PLC (Pasif)</span>'
+    +   '<select class="spl-select" id="'+uid+'_plc" onchange="hitungSplCalc(\''+uid+'\')">'
+    +     '<option value="">-- Tidak Ada PLC --</option>'
+    +     plcOpts
+    +   '</select>'
+    + '</div>'
+
+    // Output Laser
+    + '<div class="spl-field">'
+    +   '<span class="spl-label">Output Laser — Port Tap (ke pelanggan)</span>'
+    +   '<div class="spl-output-row">'
+    +     '<input class="spl-output-input" type="text" id="'+uid+'_out_tap" readonly value="--" />'
+    +     '<span class="spl-output-unit">dBm</span>'
+    +   '</div>'
+    +   '<small class="spl-output-hint">= Input − (Loss Rasio Kecil + Loss PLC)</small>'
+    + '</div>'
+
+    // Next ODP
+    + '<div class="spl-field">'
+    +   '<span class="spl-label">Next ODP — Jalur Terusan (Pass)</span>'
+    +   '<div class="spl-output-row">'
+    +     '<input class="spl-output-input" type="text" id="'+uid+'_out_pass" readonly value="--" />'
+    +     '<span class="spl-output-unit">dBm</span>'
+    +   '</div>'
+    +   '<small class="spl-output-hint">= Input − Loss Rasio Besar</small>'
+    + '</div>'
+
+    // Status
+    + '<div class="spl-status" id="'+uid+'_status">Isi form lalu klik Hitung</div>'
+
+    // Tombol hitung
+    + '<button class="'+btnClass+'" onclick="hitungSplCalc(\''+uid+'\')">🔢 Hitung</button>'
+
+    + '</div>'// end spl-calc-body
+
+    // Referensi
+    + '<div class="spl-ref">'
+    +   '<span>Loss Splicing</span><span>0.03 dB/bh</span>'
+    +   '<span>Loss Kabel</span><span>0.3 dB/km</span>'
+    +   '<span>Fast Connector</span><span>0.3 dB/bh</span>'
+    +   '<span>Pigtail/Patchcord</span><span>0.3 dB/bh</span>'
+    + '</div>'
+    + '</div>'; // end spl-calc-card
+}
+
+// Fungsi hitung splitter calculator
+function hitungSplCalc(uid) {
+  var inputEl  = document.getElementById(uid+'_input');
+  var rasioEl  = document.getElementById(uid+'_rasio');
+  var plcEl    = document.getElementById(uid+'_plc');
+  var tapEl    = document.getElementById(uid+'_out_tap');
+  var passEl   = document.getElementById(uid+'_out_pass');
+  var statusEl = document.getElementById(uid+'_status');
+
+  if (!inputEl || !tapEl) return;
+
+  var inputDbm  = parseFloat(inputEl.value);
+  if (isNaN(inputDbm)) { tapEl.value='--'; passEl.value='--'; return; }
+
+  var rasioKey  = rasioEl ? rasioEl.value : '';
+  var plcKey    = plcEl   ? plcEl.value   : '';
+
+  var lossRasioKecil = rasioKey && SPLITTER_RASIO[rasioKey] ? SPLITTER_RASIO[rasioKey].kecil : 0;
+  var lossRasioBesar = rasioKey && SPLITTER_RASIO[rasioKey] ? SPLITTER_RASIO[rasioKey].besar : 0;
+  var lossPlc        = plcKey   && SPLITTER_PLC_LOSS[plcKey] ? SPLITTER_PLC_LOSS[plcKey]    : 0;
+
+  // Output Laser (Tap) = Input - Loss Rasio Kecil - Loss PLC
+  var outTap  = inputDbm - lossRasioKecil - lossPlc;
+  // Next ODP (Pass) = Input - Loss Rasio Besar
+  var outPass = inputDbm - lossRasioBesar;
+
+  tapEl.value  = outTap.toFixed(4);
+  passEl.value = outPass.toFixed(4);
+
+  // Status berdasarkan output tap (yg ke pelanggan)
+  if (statusEl) {
+    var sc = getSplStatusClass(outTap);
+    var icon = outTap >= -24 ? '✅ Sangat Baik' : outTap >= -27 ? '⚠️ Normal (Batas)' : '❌ Di Bawah Batas (-27 dBm)';
+    statusEl.className = 'spl-status ' + sc;
+    statusEl.textContent = 'Output Tap: ' + outTap.toFixed(2) + ' dBm — ' + icon;
+  }
+}
+
+// Estimasi daya input dari jalur OLT → node (sederhana: TX - loss kabel saja)
+function estimasiInputDari(nodeId) {
+  // Cari kabel yang masuk ke node ini
+  var inCable = appData.cables.find(function(c){ return c.to === nodeId; });
+  if (!inCable) return TX_POWER_SFP; // default TX OLT
+
+  // Cari parent node
+  var parentNode = appData.nodes.find(function(n){ return n.id === inCable.from; });
+  if (!parentNode) return TX_POWER_SFP;
+
+  // Hitung jarak kabel
+  var distM  = calcDist(parentNode, appData.nodes.find(function(n){ return n.id===nodeId; }) || parentNode);
+  var distKm = distM / 1000;
+
+  // Estimasi input = TX OLT - loss kabel - loss konektor minimal
+  var lossEst = (distKm * LOSS_KABEL_PER_KM) + (2 * LOSS_PIGTAIL);
+
+  // Jika parent bukan OLT, rekursif estimasi dari parent
+  if (parentNode.type !== 'olt') {
+    var parentInput = estimasiInputDari(parentNode.id);
+    return parentInput - lossEst;
+  }
+  return TX_POWER_SFP - lossEst;
 }
 
 // ==================== SIDEBAR & THEME ====================

@@ -147,26 +147,54 @@
       </div>
 
       <div class="power-section">
-        <h4>🔆 Kalkulator Daya Optik</h4>
+        <div class="power-section-header">
+          <span>🔆 Kalkulator Daya Optik</span>
+          <span class="power-sfp-badge">SFP TX: -1.99 dBm</span>
+        </div>
         <div class="power-form">
-          <label>Daya TX OLT (dBm)</label>
-          <input type="number" id="tx-power" value="3" step="0.1" oninput="calcPower()" />
+
+          <div class="power-group-label">📡 SFP / OLT</div>
+          <label>TX Power OLT (dBm)</label>
+          <input type="number" id="tx-power" value="-1.9866" step="0.0001" oninput="calcPower()" />
+
+          <div class="power-group-label">🔌 Kabel & Konektor</div>
           <label>Panjang Kabel (km)</label>
           <input type="number" id="cable-len" value="1" step="0.1" min="0" oninput="calcPower()" />
-          <label>Splitter 1:N</label>
+          <label>Jumlah Splicing</label>
+          <input type="number" id="splice-count" value="2" min="0" oninput="calcPower()" />
+          <label>Fast Connector</label>
+          <input type="number" id="fc-count" value="2" min="0" oninput="calcPower()" />
+          <label>Pigtail / Patchcord</label>
+          <input type="number" id="pigtail-count" value="2" min="0" oninput="calcPower()" />
+
+          <div class="power-group-label">🔀 Splitter PLC</div>
           <select id="splitter-ratio" onchange="calcPower()">
-            <option value="3.5">1:2 (-3.5 dB)</option>
+            <option value="0">Tidak Ada Splitter</option>
+            <option value="3.25">1:2 (-3.25 dB)</option>
             <option value="7">1:4 (-7 dB)</option>
-            <option value="10.5" selected>1:8 (-10.5 dB)</option>
-            <option value="14">1:16 (-14 dB)</option>
-            <option value="17.5">1:32 (-17.5 dB)</option>
+            <option value="10" selected>1:8 (-10 dB)</option>
+            <option value="13.5">1:16 (-13.5 dB)</option>
+            <option value="17">1:32 (-17 dB)</option>
+            <option value="20">1:64 (-20 dB)</option>
           </select>
-          <label>Jumlah Konektor</label>
-          <input type="number" id="connector-count" value="4" min="0" oninput="calcPower()" />
+
           <div class="power-result">
-            <div class="power-result-row"><span>Redaman Total:</span><span id="total-loss" class="result-val">--</span></div>
-            <div class="power-result-row"><span>Daya RX:</span><span id="rx-power" class="result-val">--</span></div>
-            <div class="power-result-row"><span>Status:</span><span id="rx-status" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Loss Kabel:</span><span id="loss-kabel" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Loss Konektor:</span><span id="loss-konek" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Loss Splitter:</span><span id="loss-split" class="result-val">--</span></div>
+            <div class="power-result-row power-result-total"><span>Total Redaman:</span><span id="total-loss" class="result-val">--</span></div>
+            <div class="power-result-row power-result-total"><span>Daya RX:</span><span id="rx-power" class="result-val">--</span></div>
+            <div class="power-result-row"><span>Status ONT:</span><span id="rx-status" class="result-val">--</span></div>
+          </div>
+
+          <div class="power-referensi">
+            <div class="power-ref-title">ℹ️ Referensi Redaman</div>
+            <div class="power-ref-grid">
+              <span>Kabel Fiber</span><span>0.3 dB/km</span>
+              <span>Splicing</span><span>0.03 dB/bh</span>
+              <span>Fast Connector</span><span>0.3 dB/bh</span>
+              <span>Pigtail/Patchcord</span><span>0.3 dB/bh</span>
+            </div>
           </div>
         </div>
       </div>
