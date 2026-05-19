@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FTTH Maps - Pemetaan Jaringan Fiber Optik</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--bg:#0f1117;--bg2:#1a1d27;--bg3:#22263a;--border:#2e3348;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#3b82f6;--accent2:#1d4ed8;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--cyan:#06b6d4;--hh:58px;--sh:76px;--sw:290px}
+.lm{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--border:#e2e8f0;--text:#1e293b;--text2:#475569;--text3:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;font-size:13px}
+/* Header */
+.hdr{height:var(--hh);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:1000;gap:12px}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:700;color:var(--accent)}
+.sub{font-size:11px;color:var(--text3);padding-left:12px;border-left:1px solid var(--border)}
+.hdr-r{display:flex;align-items:center;gap:6px}
+.btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s}
+.bp{background:var(--accent);border-color:var(--accent);color:#fff}.bp:hover{background:var(--accent2)}
+.bs{background:var(--bg3);color:var(--text)}.bs:hover{background:var(--border)}
+.bi{background:var(--bg3);color:var(--text);padding:6px 9px;font-size:14px}
+/* Stats */
+.stats{position:fixed;top:var(--hh);left:0;right:0;height:var(--sh);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px;z-index:900;overflow-x:auto}
+.sc{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:7px 12px;min-width:110px;cursor:pointer;transition:border-color .15s;flex-shrink:0}
+.sc:hover{border-color:var(--accent)}
+.si{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.si svg{flex-shrink:0}
+.si-p{background:rgba(59,130,246,.15);color:var(--accent)}
+.si-o{background:rgba(16,185,129,.15);color:var(--green)}
+.si-c{background:rgba(245,158,11,.15);color:var(--amber)}
+.si-d{background:rgba(139,92,246,.15);color:var(--purple)}
+.si-s{background:rgba(6,182,212,.15);color:var(--cyan)}
+.si-k{background:rgba(239,68,68,.15);color:var(--red)}
+.sn{font-size:20px;font-weight:700;line-height:1}
+.sl{font-size:10px;color:var(--text3);margin-top:1px}
+.sdots{display:flex;gap:3px;margin-top:2px;font-size:9px}
+.dg{color:var(--green)}.dr{color:var(--red)}
+/* Main */
+.main{display:flex;position:fixed;top:calc(var(--hh) + var(--sh));left:0;right:0;bottom:0}
+/* Sidebar */
+.sb{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .25s}
+.sb.col{width:0;overflow:hidden}
+.sbh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sbh h3{font-size:13px;font-weight:600}
+.sbt{background:none;border:none;cursor:pointer;color:var(--text2);font-size:17px;padding:2px 5px;border-radius:4px}
+.sbt:hover{background:var(--bg3)}
+.srch{display:flex;align-items:center;gap:7px;margin:8px 10px;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2)}
+.srch input{background:none;border:none;outline:none;color:var(--text);width:100%;font-size:12px}
+.srch input::placeholder{color:var(--text3)}
+.sec{padding:0 10px 6px;flex-shrink:0}
+.sec h4,.nls h4,.pws h4{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;margin-top:3px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.fi{display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;padding:3px 5px;border-radius:5px;color:var(--text2)}
+.fi:hover{background:var(--bg3)}
+.fd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fd.p{background:#3b82f6}.fd.o{background:#10b981}.fd.c{background:#f59e0b}.fd.d{background:#8b5cf6}.fd.s{background:#06b6d4}.fd.k{background:#94a3b8}
+.nls{padding:0 10px;flex:1;overflow:hidden;display:flex;flex-direction:column}
+.nl{overflow-y:auto;flex:1}
+.nl::-webkit-scrollbar{width:3px}
+.nl::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.bdg{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:9px;padding:1px 6px;font-size:10px;margin-left:3px}
+.ni{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;transition:all .1s}
+.ni:hover{background:var(--bg3);border-color:var(--border)}
+.ni.act{background:rgba(59,130,246,.1);border-color:var(--accent)}
+.nd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.nd.p{background:#3b82f6}.nd.o{background:#10b981}.nd.c{background:#f59e0b}.nd.d{background:#8b5cf6}.nd.s{background:#06b6d4}
+.nif{flex:1;min-width:0}
+.nm{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nt{font-size:10px;color:var(--text3);text-transform:uppercase}
+.nsb{font-size:9px;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.sa{background:rgba(16,185,129,.15);color:var(--green)}
+.si2{background:rgba(239,68,68,.15);color:var(--red)}
+.sm{background:rgba(245,158,11,.15);color:var(--amber)}
+/* Power */
+.pws{padding:8px 10px;border-top:1px solid var(--border);flex-shrink:0}
+.pf{display:flex;flex-direction:column;gap:5px}
+.pf label{font-size:10px;color:var(--text3)}
+.pf input,.pf select{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 7px;color:var(--text);font-size:11px;outline:none}
+.pf input:focus,.pf select:focus{border-color:var(--accent)}
+.pf select option{background:var(--bg2)}
+.pr{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 9px;margin-top:3px}
+.prr{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--text2)}
+.rv{font-weight:600;color:var(--text)}
+.rok{color:var(--green)!important}.rw{color:var(--amber)!important}.rb{color:var(--red)!important}
+/* Map */
+.mc{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+.mctrl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:3px;z-index:500}
+.mb{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text);font-weight:600;transition:all .15s}
+.mb:hover{background:var(--bg3);border-color:var(--accent)}
+.lsw{position:absolute;bottom:20px;right:10px;display:flex;gap:3px;z-index:500}
+.lb{padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:11px;transition:all .15s}
+.lb:hover{background:var(--bg3)}
+.lb.act{background:var(--accent);border-color:var(--accent);color:#fff}
+.lgd{position:absolute;bottom:20px;left:10px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;z-index:500;min-width:120px}
+.lgdt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:7px}
+.lgdi{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);margin-bottom:3px}
+.lgdd{width:11px;height:11px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.3)}
+.lgdd.o{background:#10b981}.lgdd.c{background:#f59e0b}.lgdd.d{background:#8b5cf6}.lgdd.s{background:#06b6d4}.lgdd.p{background:#3b82f6}
+.lgdl{display:inline-block;width:18px;height:3px;border-radius:2px}
+.lgdl.tr{background:#f59e0b}.lgdl.di{background:#10b981}.lgdl.dr{background:#94a3b8}
+/* Modal */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
+.mod{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:420px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.moh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.moh h3{font-size:14px;font-weight:600}
+.moc{background:none;border:none;cursor:pointer;color:var(--text2);font-size:17px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:5px}
+.moc:hover{background:var(--bg3);color:var(--text)}
+.mob{padding:14px 18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px}
+.mof{padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px;flex-shrink:0}
+.fg2{display:flex;flex-direction:column;gap:4px}
+.fg2 label{font-size:11px;color:var(--text2);font-weight:500}
+.fg2 input,.fg2 select,.fg2 textarea{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 9px;color:var(--text);font-size:12px;outline:none;width:100%;font-family:inherit}
+.fg2 input:focus,.fg2 select:focus,.fg2 textarea:focus{border-color:var(--accent)}
+.fg2 select option{background:var(--bg2)}
+.fg2 textarea{resize:vertical;min-height:55px}
+.tip{font-size:11px;color:var(--text3);background:var(--bg3);border-radius:7px;padding:7px 9px}
+.dr2{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dr2:last-child{border-bottom:none}
+.dl{color:var(--text3)}.dv{color:var(--text);font-weight:500}
+/* Leaflet */
+.leaflet-container{background:var(--bg)}
+.leaflet-popup-content-wrapper{background:var(--bg2)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:9px!important;box-shadow:0 8px 32px rgba(0,0,0,.4)!important}
+.leaflet-popup-tip{background:var(--bg2)!important}
+.leaflet-popup-content{margin:11px 14px!important;min-width:170px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="hdr">
+  <div class="hdr-l">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="#3b82f6" stroke-width="2"/><path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" fill="#3b82f6" opacity="0.2"/><path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" stroke="#3b82f6" stroke-width="1.5" fill="none"/><circle cx="14" cy="14" r="3" fill="#3b82f6"/><circle cx="7" cy="14" r="2" fill="#10b981"/><circle cx="21" cy="14" r="2" fill="#10b981"/><circle cx="14" cy="7" r="2" fill="#f59e0b"/><circle cx="14" cy="21" r="2" fill="#f59e0b"/></svg>
+      FTTH Maps
+    </div>
+    <span class="sub">Pemetaan Jaringan Fiber Optik | OLT: HSGQ-XE04ID</span>
+  </div>
+  <div class="hdr-r">
+    <button class="btn bs" onclick="openModal('an')"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Tambah Node</button>
+    <button class="btn bp" onclick="openModal('ac')"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Tambah Kabel</button>
+    <button class="btn bi" onclick="toggleTheme()" id="tbtn">🌙</button>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="sc"><div class="si si-p"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="sn" id="cp">0</div><div class="sl">Pelanggan</div><div class="sdots"><span class="dg" id="dpa">●0</span><span class="dr" id="dpi">●0</span></div></div></div>
+  <div class="sc"><div class="si si-o"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M6 10h2M12 10h2M18 10h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="sn" id="co">0</div><div class="sl">OLT</div><div class="sdots"><span class="dg" id="doa">●0</span><span class="dr" id="doi">●0</span></div></div></div>
+  <div class="sc"><div class="si si-c"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2"/></svg></div><div><div class="sn" id="cc">0</div><div class="sl">ODC</div><div class="sdots"><span class="dg" id="dca">●0</span><span class="dr" id="dci">●0</span></div></div></div>
+  <div class="sc"><div class="si si-d"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="sn" id="cd">0</div><div class="sl">ODP</div><div class="sdots"><span class="dg" id="dda">●0</span><span class="dr" id="ddi">●0</span></div></div></div>
+  <div class="sc"><div class="si si-s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="sn" id="cs">0</div><div class="sl">Splitter</div><div class="sdots"><span class="dg" id="dsa">●0</span><span class="dr" id="dsi">●0</span></div></div></div>
+  <div class="sc"><div class="si si-k"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 12 Q8 6 12 12 Q16 18 20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div><div><div class="sn" id="ck">0</div><div class="sl">Kabel (km)</div></div></div>
+</div>
+
+<div class="main">
+  <aside class="sb" id="sidebar">
+    <div class="sbh"><h3>Panel Kontrol</h3><button class="sbt" onclick="toggleSb()">‹</button></div>
+    <div class="srch"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="si" placeholder="Cari node..." oninput="searchN(this.value)"/></div>
+    <div class="sec">
+      <h4>Filter Tampilan</h4>
+      <div class="fg">
+        <label class="fi"><input type="checkbox" checked onchange="togL('pelanggan')"/><span class="fd p"></span>Pelanggan</label>
+        <label class="fi"><input type="checkbox" checked onchange="togL('olt')"/><span class="fd o"></span>OLT</label>
+        <label class="fi"><input type="checkbox" checked onchange="togL('odc')"/><span class="fd c"></span>ODC</label>
+        <label class="fi"><input type="checkbox" checked onchange="togL('odp')"/><span class="fd d"></span>ODP</label>
+        <label class="fi"><input type="checkbox" checked onchange="togL('splitter')"/><span class="fd s"></span>Splitter</label>
+        <label class="fi"><input type="checkbox" checked onchange="togL('kabel')"/><span class="fd k"></span>Kabel FO</label>
+      </div>
+    </div>
+    <div class="nls"><h4>Daftar Node <span class="bdg" id="ncb">0</span></h4><div id="nl" class="nl"></div></div>
+    <div class="pws">
+      <h4>🔆 Kalkulator Daya Optik</h4>
+      <div class="pf">
+        <label>TX OLT (dBm)</label><input type="number" id="tx" value="3" step="0.1" oninput="calcP()"/>
+        <label>Panjang Kabel (km)</label><input type="number" id="cl" value="1" step="0.1" min="0" oninput="calcP()"/>
+        <label>Splitter 1:N</label>
+        <select id="sr" onchange="calcP()">
+          <option value="3.5">1:2 (-3.5 dB)</option>
+          <option value="7">1:4 (-7 dB)</option>
+          <option value="10.5" selected>1:8 (-10.5 dB)</option>
+          <option value="14">1:16 (-14 dB)</option>
+          <option value="17.5">1:32 (-17.5 dB)</option>
+        </select>
+        <label>Jumlah Konektor</label><input type="number" id="cn" value="4" min="0" oninput="calcP()"/>
+        <div class="pr">
+          <div class="prr"><span>Redaman Total:</span><span class="rv" id="tl">--</span></div>
+          <div class="prr"><span>Daya RX:</span><span class="rv" id="rp">--</span></div>
+          <div class="prr"><span>Status:</span><span class="rv" id="rs">--</span></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="mc">
+    <div id="map"></div>
+    <div class="mctrl">
+      <button class="mb" onclick="map.zoomIn()">+</button>
+      <button class="mb" onclick="map.zoomOut()">−</button>
+      <button class="mb" onclick="fitAll()" title="Fit All">⊡</button>
+    </div>
+    <div class="lsw">
+      <button class="lb act" onclick="swL('satellite',this)">Satelit</button>
+      <button class="lb" onclick="swL('street',this)">Jalan</button>
+      <button class="lb" onclick="swL('topo',this)">Topo</button>
+    </div>
+    <div class="lgd">
+      <div class="lgdt">Legenda</div>
+      <div class="lgdi"><span class="lgdd o"></span>OLT</div>
+      <div class="lgdi"><span class="lgdd c"></span>ODC</div>
+      <div class="lgdi"><span class="lgdd d"></span>ODP</div>
+      <div class="lgdi"><span class="lgdd s"></span>Splitter</div>
+      <div class="lgdi"><span class="lgdd p"></span>Pelanggan</div>
+      <div class="lgdi"><span class="lgdl tr"></span>Trunk</div>
+      <div class="lgdi"><span class="lgdl di"></span>Distribution</div>
+      <div class="lgdi"><span class="lgdl dr"></span>Drop</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal Add Node -->
+<div class="mov" id="m-an" style="display:none">
+  <div class="mod">
+    <div class="moh"><h3>Tambah Node Jaringan</h3><button class="moc" onclick="closeM('an')">✕</button></div>
+    <div class="mob">
+      <div class="fg2"><label>Jenis Node</label><select id="nt" onchange="updNF()"><option value="pelanggan">Pelanggan</option><option value="olt">OLT</option><option value="odc">ODC</option><option value="odp">ODP</option><option value="splitter">Splitter</option></select></div>
+      <div class="fg2"><label>Nama / ID Node</label><input id="nn" placeholder="Contoh: ODP-A01, Pelanggan-001"/></div>
+      <div id="nef"></div>
+      <div class="fg2"><label>Latitude</label><input type="number" id="nlat" placeholder="-6.345932" step="0.000001"/></div>
+      <div class="fg2"><label>Longitude</label><input type="number" id="nlng" placeholder="107.955388" step="0.000001"/></div>
+      <div class="fg2"><label>Status</label><select id="nst"><option value="active">Aktif</option><option value="inactive">Tidak Aktif</option><option value="maintenance">Maintenance</option></select></div>
+      <div class="fg2"><label>Catatan</label><textarea id="note" rows="2" placeholder="Catatan tambahan..."></textarea></div>
+      <div class="tip">💡 Klik langsung pada peta untuk mengisi koordinat otomatis</div>
+    </div>
+    <div class="mof"><button class="btn bs" onclick="closeM('an')">Batal</button><button class="btn bp" onclick="addNode()">Simpan Node</button></div>
+  </div>
+</div>
+
+<!-- Modal Add Cable -->
+<div class="mov" id="m-ac" style="display:none">
+  <div class="mod">
+    <div class="moh"><h3>Tambah Kabel Fiber Optik</h3><button class="moc" onclick="closeM('ac')">✕</button></div>
+    <div class="mob">
+      <div class="fg2"><label>Dari Node</label><select id="cf"></select></div>
+      <div class="fg2"><label>Ke Node</label><select id="ct"></select></div>
+      <div class="fg2"><label>Jenis Kabel</label><select id="cty"><option value="trunk">Trunk (Backbone)</option><option value="distribution">Distribution</option><option value="drop">Drop Cable</option></select></div>
+      <div class="fg2"><label>Kapasitas Core</label><select id="cc2"><option>4</option><option>8</option><option selected>12</option><option>24</option><option>48</option></select></div>
+      <div class="fg2"><label>Status</label><select id="cst"><option value="active">Aktif</option><option value="inactive">Tidak Aktif</option><option value="maintenance">Maintenance</option></select></div>
+    </div>
+    <div class="mof"><button class="btn bs" onclick="closeM('ac')">Batal</button><button class="btn bp" onclick="addCable()">Simpan Kabel</button></div>
+  </div>
+</div>
+
+<!-- Modal Node Detail -->
+<div class="mov" id="m-nd" style="display:none">
+  <div class="mod">
+    <div class="moh"><h3 id="dtit">Detail Node</h3><button class="moc" onclick="closeM('nd')">✕</button></div>
+    <div class="mob" id="dbod"></div>
+    <div class="mof"><button class="btn" style="background:#dc2626;border-color:#dc2626;color:#fff" onclick="delNode()">Hapus</button><button class="btn bs" onclick="closeM('nd')">Tutup</button></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DK='ftth_d';
+let D={nodes:[],cables:[],nid:1};
+let map,mkrs={},cabs={},lys={pelanggan:1,olt:1,odc:1,odp:1,splitter:1,kabel:1};
+let curL='satellite',bls={},selNode=null,isDark=true,sbOpen=true;
+
+const TC={olt:{c:'#10b981',l:'OLT',sz:34},odc:{c:'#f59e0b',l:'ODC',sz:28},odp:{c:'#8b5cf6',l:'ODP',sz:24},splitter:{c:'#06b6d4',l:'SPL',sz:20},pelanggan:{c:'#3b82f6',l:'🏠',sz:17}};
+const CC={trunk:'#f59e0b',distribution:'#10b981',drop:'#94a3b8'};
+const TILES={satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri'},street:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM'},topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OpenTopo'}};
+
+function saveD(){localStorage.setItem(DK,JSON.stringify(D))}
+function loadD(){
+  const r=localStorage.getItem(DK);
+  if(r){D=JSON.parse(r)}else{seedD()}
+}
+
+function seedD(){
+  D.nodes=[
+    {id:1,type:'olt',name:'OLT-HSGQ-XE04ID',lat:-6.3459,lng:107.9554,status:'active',notes:'4 PON Port EPON',extra:{model:'HSGQ-XE04ID',pon:4}},
+    {id:2,type:'odc',name:'ODC-A01',lat:-6.3430,lng:107.9590,status:'active',notes:'Splitter 1:8',extra:{cap:'1:8'}},
+    {id:3,type:'odc',name:'ODC-B01',lat:-6.3480,lng:107.9530,status:'active',notes:'Splitter 1:8',extra:{cap:'1:8'}},
+    {id:4,type:'odp',name:'ODP-A01',lat:-6.3420,lng:107.9610,status:'active',notes:'RT 01',extra:{core:8}},
+    {id:5,type:'odp',name:'ODP-A02',lat:-6.3415,lng:107.9625,status:'active',notes:'RT 02',extra:{core:8}},
+    {id:6,type:'odp',name:'ODP-B01',lat:-6.3490,lng:107.9510,status:'active',notes:'RT 03',extra:{core:8}},
+    {id:7,type:'odp',name:'ODP-B02',lat:-6.3500,lng:107.9495,status:'maintenance',notes:'RT 04',extra:{core:8}},
+    {id:8,type:'splitter',name:'SPL-A01-1',lat:-6.3422,lng:107.9608,status:'active',notes:'',extra:{ratio:'1:4'}},
+    {id:9,type:'splitter',name:'SPL-A01-2',lat:-6.3418,lng:107.9622,status:'active',notes:'',extra:{ratio:'1:4'}},
+    {id:10,type:'pelanggan',name:'PLG-001 Budi S.',lat:-6.3416,lng:107.9612,status:'active',notes:'',extra:{ont:'ZTE F601',port:'PON1/0/1'}},
+    {id:11,type:'pelanggan',name:'PLG-002 Sari W.',lat:-6.3418,lng:107.9615,status:'active',notes:'',extra:{ont:'ZTE F601',port:'PON1/0/2'}},
+    {id:12,type:'pelanggan',name:'PLG-003 Agus T.',lat:-6.3420,lng:107.9617,status:'inactive',notes:'Belum bayar',extra:{ont:'Huawei EG8145',port:'PON1/0/3'}},
+    {id:13,type:'pelanggan',name:'PLG-004 Dewi L.',lat:-6.3413,lng:107.9628,status:'active',notes:'',extra:{ont:'ZTE F601',port:'PON1/0/4'}},
+    {id:14,type:'pelanggan',name:'PLG-005 Hendra K.',lat:-6.3412,lng:107.9630,status:'active',notes:'',extra:{ont:'ZTE F601',port:'PON1/0/5'}},
+    {id:15,type:'pelanggan',name:'PLG-006 Rina P.',lat:-6.3492,lng:107.9512,status:'active',notes:'',extra:{ont:'Huawei EG8145',port:'PON2/0/1'}},
+    {id:16,type:'pelanggan',name:'PLG-007 Wahyu N.',lat:-6.3495,lng:107.9508,status:'active',notes:'',extra:{ont:'ZTE F601',port:'PON2/0/2'}},
+  ];
+  D.cables=[
+    {id:'c1',from:1,to:2,type:'trunk',cores:12,status:'active'},
+    {id:'c2',from:1,to:3,type:'trunk',cores:12,status:'active'},
+    {id:'c3',from:2,to:4,type:'distribution',cores:8,status:'active'},
+    {id:'c4',from:2,to:5,type:'distribution',cores:8,status:'active'},
+    {id:'c5',from:3,to:6,type:'distribution',cores:8,status:'active'},
+    {id:'c6',from:3,to:7,type:'distribution',cores:8,status:'maintenance'},
+    {id:'c7',from:4,to:8,type:'drop',cores:4,status:'active'},
+    {id:'c8',from:5,to:9,type:'drop',cores:4,status:'active'},
+    {id:'c9',from:8,to:10,type:'drop',cores:4,status:'active'},
+    {id:'c10',from:8,to:11,type:'drop',cores:4,status:'active'},
+    {id:'c11',from:8,to:12,type:'drop',cores:4,status:'active'},
+    {id:'c12',from:9,to:13,type:'drop',cores:4,status:'active'},
+    {id:'c13',from:9,to:14,type:'drop',cores:4,status:'active'},
+    {id:'c14',from:6,to:15,type:'drop',cores:4,status:'active'},
+    {id:'c15',from:6,to:16,type:'drop',cores:4,status:'active'},
+  ];
+  D.nid=20;saveD();
+}
+
+function initMap(){
+  map=L.map('map',{center:[-6.3459,107.9554],zoom:15,zoomControl:false,attributionControl:false});
+  Object.entries(TILES).forEach(([k,v])=>{bls[k]=L.tileLayer(v.url,{attribution:v.attr,maxZoom:20})});
+  bls.satellite.addTo(map);
+  map.on('click',e=>{
+    if(document.getElementById('m-an').style.display!=='none'){
+      document.getElementById('nlat').value=e.latlng.lat.toFixed(6);
+      document.getElementById('nlng').value=e.latlng.lng.toFixed(6);
+    }
+  });
+}
+
+function mkIcon(type,status){
+  const cfg=TC[type]||TC.pelanggan;
+  const s=cfg.sz;
+  const op=status==='inactive'?0.5:1;
+  const bc=status==='maintenance'?'#f59e0b':'rgba(255,255,255,0.9)';
+  const anim=type==='olt'?'animation:pulse 2s infinite;':'';
+  const d=document.createElement('div');
+  d.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:${cfg.c};border:2.5px solid ${bc};display:flex;align-items:center;justify-content:center;font-size:${Math.max(8,s/3.5)}px;font-weight:700;color:white;box-shadow:0 2px 8px rgba(0,0,0,0.4);cursor:pointer;opacity:${op};${anim}`;
+  d.textContent=cfg.l;
+  return L.divIcon({html:d.outerHTML,iconSize:[s,s],iconAnchor:[s/2,s/2],className:''});
+}
+
+function renderAll(){
+  Object.values(mkrs).forEach(m=>m.remove());
+  Object.values(cabs).forEach(c=>c.remove());
+  mkrs={};cabs={};
+  if(lys.kabel){
+    D.cables.forEach(c=>{
+      const f=D.nodes.find(n=>n.id===c.from),t=D.nodes.find(n=>n.id===c.to);
+      if(!f||!t)return;
+      const col=c.status==='maintenance'?'#f59e0b':c.status==='inactive'?'#ef4444':CC[c.type]||'#94a3b8';
+      const w=c.type==='trunk'?4:c.type==='distribution'?3:2;
+      const da=c.type==='drop'?'5,5':null;
+      const pl=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:col,weight:w,dashArray:da,opacity:0.85}).addTo(map);
+      pl.bindPopup(`<div style="font-size:12px"><b>🔌 Kabel FO</b><br>Dari: ${f.name}<br>Ke: ${t.name}<br>Tipe: ${c.type}<br>Core: ${c.cores}<br>Status: <span style="color:${c.status==='active'?'#10b981':'#ef4444'}">${c.status}</span><br><hr style="margin:6px 0;opacity:.2">Jarak: ~${dist(f,t)} m</div>`);
+      cabs[c.id]=pl;
+    });
+  }
+  D.nodes.forEach(node=>{
+    if(!lys[node.type])return;
+    const m=L.marker([node.lat,node.lng],{icon:mkIcon(node.type,node.status),title:node.name}).addTo(map);
+    m.on('click',()=>showDet(node.id));
+    mkrs[node.id]=m;
+  });
+  updStats();updList();
+}
+
+function dist(a,b){
+  const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  return Math.round(2*R*Math.asin(Math.sqrt(Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2)));
+}
+
+function updStats(){
+  [['pelanggan','cp','dpa','dpi'],['olt','co','doa','doi'],['odc','cc','dca','dci'],['odp','cd','dda','ddi'],['splitter','cs','dsa','dsi']].forEach(([t,cid,aid,iid])=>{
+    const ns=D.nodes.filter(n=>n.type===t);
+    const a=ns.filter(n=>n.status==='active').length;
+    const i=ns.length-a;
+    document.getElementById(cid).textContent=ns.length;
+    document.getElementById(aid).textContent=`●${a}`;
+    document.getElementById(iid).textContent=`●${i}`;
+  });
+  let td=0;
+  D.cables.forEach(c=>{const f=D.nodes.find(n=>n.id===c.from),t=D.nodes.find(n=>n.id===c.to);if(f&&t)td+=dist(f,t);});
+  document.getElementById('ck').textContent=(td/1000).toFixed(2);
+}
+
+function updList(f=''){
+  const ns=D.nodes.filter(n=>n.name.toLowerCase().includes(f.toLowerCase())||n.type.toLowerCase().includes(f.toLowerCase()));
+  document.getElementById('ncb').textContent=ns.length;
+  document.getElementById('nl').innerHTML=ns.map(n=>`
+    <div class="ni" onclick="focN(${n.id})">
+      <div class="nd ${n.type==='olt'?'o':n.type==='odc'?'c':n.type==='odp'?'d':n.type==='splitter'?'s':'p'}"></div>
+      <div class="nif"><div class="nm">${n.name}</div><div class="nt">${n.type}</div></div>
+      <span class="nsb ${n.status==='active'?'sa':n.status==='inactive'?'si2':'sm'}">${n.status}</span>
+    </div>`).join('');
+}
+
+function searchN(v){updList(v)}
+function focN(id){
+  const n=D.nodes.find(x=>x.id===id);if(!n)return;
+  map.setView([n.lat,n.lng],18,{animate:true});
+  showDet(id);
+}
+
+function showDet(id){
+  const n=D.nodes.find(x=>x.id===id);if(!n)return;
+  selNode=id;
+  const cfg=TC[n.type];
+  document.getElementById('dtit').textContent=`${cfg.l} — ${n.name}`;
+  const conn=D.cables.filter(c=>c.from===id||c.to===id);
+  let ex='';
+  if(n.extra)Object.entries(n.extra).forEach(([k,v])=>{ex+=`<div class="dr2"><span class="dl">${k}</span><span class="dv">${v}</span></div>`;});
+  document.getElementById('dbod').innerHTML=`
+    <div class="dr2"><span class="dl">Tipe</span><span class="dv" style="color:${cfg.c}">${n.type.toUpperCase()}</span></div>
+    <div class="dr2"><span class="dl">Status</span><span class="dv"><span class="nsb ${n.status==='active'?'sa':n.status==='inactive'?'si2':'sm'}">${n.status}</span></span></div>
+    <div class="dr2"><span class="dl">Koordinat</span><span class="dv">${n.lat.toFixed(5)}, ${n.lng.toFixed(5)}</span></div>
+    ${ex}
+    <div class="dr2"><span class="dl">Kabel Terhubung</span><span class="dv">${conn.length} kabel</span></div>
+    ${n.notes?`<div class="dr2"><span class="dl">Catatan</span><span class="dv">${n.notes}</span></div>`:''}
+  `;
+  openModal('nd');
+}
+
+function delNode(){
+  if(!selNode)return;
+  if(!confirm('Hapus node ini beserta semua kabel yang terhubung?'))return;
+  D.nodes=D.nodes.filter(n=>n.id!==selNode);
+  D.cables=D.cables.filter(c=>c.from!==selNode&&c.to!==selNode);
+  saveD();closeM('nd');renderAll();
+}
+
+function togL(t){lys[t]=!lys[t];renderAll()}
+function fitAll(){
+  if(!D.nodes.length)return;
+  map.fitBounds(L.latLngBounds(D.nodes.map(n=>[n.lat,n.lng])),{padding:[50,50]});
+}
+function swL(n,btn){
+  if(curL===n)return;
+  bls[curL].remove();bls[n].addTo(map);curL=n;
+  document.querySelectorAll('.lb').forEach(b=>b.classList.remove('act'));btn.classList.add('act');
+}
+
+function openModal(id){
+  if(id==='ac')popCS();
+  if(id==='an')updNF();
+  document.getElementById('m-'+id).style.display='flex';
+}
+function closeM(id){document.getElementById('m-'+id).style.display='none'}
+
+function updNF(){
+  const t=document.getElementById('nt')?.value;
+  const el=document.getElementById('nef');if(!el)return;
+  const fs={
+    olt:`<div class="fg2"><label>Model OLT</label><input id="xm" value="HSGQ-XE04ID"/></div><div class="fg2"><label>PON Ports</label><input type="number" id="xp" value="4"/></div>`,
+    odc:`<div class="fg2"><label>Kapasitas</label><select id="xc"><option>1:4</option><option selected>1:8</option><option>1:16</option><option>1:32</option></select></div>`,
+    odp:`<div class="fg2"><label>Kapasitas Core</label><input type="number" id="xco" value="8"/></div>`,
+    splitter:`<div class="fg2"><label>Rasio</label><select id="xr"><option>1:2</option><option>1:4</option><option selected>1:8</option><option>1:16</option><option>1:32</option></select></div>`,
+    pelanggan:`<div class="fg2"><label>Tipe ONT</label><input id="xon" placeholder="ZTE F601"/></div><div class="fg2"><label>Port PON</label><input id="xpo" placeholder="PON-1/0/1"/></div>`
+  };
+  el.innerHTML=fs[t]||'';
+}
+
+function addNode(){
+  const type=document.getElementById('nt').value;
+  const name=document.getElementById('nn').value.trim();
+  const lat=parseFloat(document.getElementById('nlat').value);
+  const lng=parseFloat(document.getElementById('nlng').value);
+  const status=document.getElementById('nst').value;
+  const notes=document.getElementById('note').value;
+  if(!name||isNaN(lat)||isNaN(lng)){alert('Nama dan koordinat harus diisi!');return}
+  let extra={};
+  ['xm','xp','xc','xco','xr','xon','xpo'].forEach(id=>{const e=document.getElementById(id);if(e)extra[id.slice(1)]=e.value});
+  D.nodes.push({id:D.nid++,type,name,lat,lng,status,notes,extra});
+  saveD();closeM('an');renderAll();
+  setTimeout(()=>map.setView([lat,lng],17,{animate:true}),100);
+  ['nn','nlat','nlng','note'].forEach(id=>document.getElementById(id).value='');
+}
+
+function popCS(){
+  const opts=D.nodes.map(n=>`<option value="${n.id}">${n.name} (${n.type})</option>`).join('');
+  document.getElementById('cf').innerHTML=opts;
+  document.getElementById('ct').innerHTML=opts;
+  if(D.nodes.length>1)document.getElementById('ct').selectedIndex=1;
+}
+
+function addCable(){
+  const from=parseInt(document.getElementById('cf').value);
+  const to=parseInt(document.getElementById('ct').value);
+  const type=document.getElementById('cty').value;
+  const cores=parseInt(document.getElementById('cc2').value);
+  const status=document.getElementById('cst').value;
+  if(from===to){alert('Node asal dan tujuan tidak boleh sama!');return}
+  if(D.cables.find(c=>(c.from===from&&c.to===to)||(c.from===to&&c.to===from))){alert('Kabel sudah ada!');return}
+  D.cables.push({id:`c${Date.now()}`,from,to,type,cores,status});
+  saveD();closeM('ac');renderAll();
+}
+
+function calcP(){
+  const tx=parseFloat(document.getElementById('tx').value)||0;
+  const cl=parseFloat(document.getElementById('cl').value)||0;
+  const sr=parseFloat(document.getElementById('sr').value)||0;
+  const cn=parseInt(document.getElementById('cn').value)||0;
+  const tl=cl*0.35+cl*0.1+sr+cn*0.3;
+  const rx=tx-tl;
+  document.getElementById('tl').textContent=`-${tl.toFixed(2)} dB`;
+  const rpEl=document.getElementById('rp'),rsEl=document.getElementById('rs');
+  rpEl.textContent=`${rx.toFixed(2)} dBm`;
+  if(rx>=-24){rpEl.className='rv rok';rsEl.textContent='✅ Sangat Baik';rsEl.className='rv rok'}
+  else if(rx>=-27){rpEl.className='rv rw';rsEl.textContent='⚠️ Normal (Batas)';rsEl.className='rv rw'}
+  else{rpEl.className='rv rb';rsEl.textContent='❌ Di Bawah Batas';rsEl.className='rv rb'}
+}
+
+function toggleSb(){
+  sbOpen=!sbOpen;
+  document.getElementById('sidebar').classList.toggle('col',!sbOpen);
+  document.querySelector('.sbt').textContent=sbOpen?'‹':'›';
+}
+
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('lm',!isDark);
+  document.getElementById('tbtn').textContent=isDark?'🌙':'☀️';
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')['an','ac','nd'].forEach(closeM)});
+document.querySelectorAll('.mov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id.replace('m-',''))}));
+
+window.addEventListener('DOMContentLoaded',()=>{
+  loadD();initMap();renderAll();calcP();
+  setTimeout(fitAll,600);
+});
+</script>
+</body>
+</html>
